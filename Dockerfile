@@ -12,9 +12,9 @@ ENV DEBIAN_FRONTEND=noninteractive \
 WORKDIR /
 
 # Install Ubuntu packages
-RUN apt update && \
-    apt -y upgrade && \
-    apt install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get -y upgrade && \
+    apt-get install -y --no-install-recommends \
         software-properties-common \
         python3.8 \
         python3.8-venv \
@@ -47,17 +47,12 @@ RUN apt update && \
         apt-transport-https ca-certificates \
         libxrender1 libsm6 && \
     update-ca-certificates && \
-    apt clean && \
+    apt-get clean && \
     git lfs install && \
     rm -rf /var/lib/apt/lists/* && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
-    ln -s /usr/bin/python3.8 /usr/bin/python
-
-###############################################
-# Stage 2: Install Web UI and python modules
-FROM base as setup
-
-RUN python3 -m venv /venv && \
+    ln -s /usr/bin/python3.8 /usr/bin/python && \
+    python3 -m venv /venv && \
     git clone -b ${ANYDOOR_VERSION} https://github.com/damo-vilab/AnyDoor.git && \
     cd /AnyDoor && \
     source /venv/bin/activate && \
