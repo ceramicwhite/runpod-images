@@ -44,8 +44,7 @@ RUN apt-get update && \
         pkg-config \
         libcairo2-dev \
         libgoogle-perftools4 libtcmalloc-minimal4 \
-        apt-transport-https ca-certificates \
-        libxrender1 libsm6 && \
+        apt-transport-https ca-certificates && \
     update-ca-certificates && \
     apt-get clean && \
     git lfs install && \
