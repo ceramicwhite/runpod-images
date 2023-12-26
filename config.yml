@@ -119,7 +119,7 @@ server:
   driver: cherrypy
   host: 0.0.0.0
   port: 3001
-  secure: true
+  secure: false
   template:
     recurse: true
 session:
