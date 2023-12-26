@@ -1,0 +1,180 @@
+enfugue:
+  engine:
+    logging:
+      file: /Enfugue/enfugue-engine.log
+      handler: file
+      level: debug
+    root: /Enfugue/enfugue
+  noauth: true
+  queue: 4
+  safe: true
+environment_prefix: ENFUGUE
+logging:
+  colored: false
+  file: /Enfugue/enfugue.log
+  handler: file
+  level: error
+  silenced:
+  - sqlalchemy.pool.impl.NullPool
+  - http.client
+orm:
+  connection:
+    database: /Enfugue/enfugue.db
+  migrate: true
+  type: sqlite
+sandboxed: false
+server:
+  classes:
+  - enfugue.server.EnfugueServer
+  cms:
+    context:
+      base:
+        android:
+          icon:
+            href: /static/img/favicon/favicon-128x128.png
+            size: 128x128
+            type: image/png
+        author:
+          email: benjamin@enfugue.ai
+          name: Benjamin Paine
+        description: The Enfugue Web App brings StableDiffusion art to your browser,
+          for free.
+        license:
+          href: https://www.gnu.org/licenses/agpl-3.0.html
+          name: GNU Affero General Public License (AGPL) v3.0
+        links:
+          apple-touch-icon:
+          - href: /static/img/favicon/favicon-256x256.png
+            sizes: 256x256
+          icon:
+          - href: /static/img/favicon/favicon-16x16.png
+            sizes: 16x16
+            type: image/png
+          - href: /static/img/favicon/favicon-32x32.png
+            sizes: 32x32
+            type: image/png
+          manifest:
+          - href: /manifest.json
+          preconnect:
+          - href: https://fonts.googleapis.com
+          - crossorigin: null
+            href: https://fonts.gstatic.com
+          shortcut icon:
+          - href: /static/img/favicon/favicon.ico
+            type: image/x-icon
+          stylesheet:
+          - href: /static/css/01-reset.min.css
+          - href: /static/css/02-variables.min.css
+          - href: /static/css/03-fonts.min.css
+            media: print
+            onload: this.media='all'
+          - href: /static/css/04-base.min.css
+          - href: /static/css/05-common.min.css
+          - href: /static/css/06-header.min.css
+          - href: /static/css/07-main.min.css
+          - href: /static/css/08-enfugue.min.css
+          - href: /static/css/09-enfugue-nodes.min.css
+          - href: /static/css/vendor/fa/fontawesome.min.css
+            media: print
+            onload: this.media='all'
+          - href: /static/css/vendor/fa/regular.min.css
+            media: print
+            onload: this.media='all'
+          - href: /static/css/vendor/fa/brands.min.css
+            media: print
+            onload: this.media='all'
+          - href: /static/css/vendor/fa/solid.min.css
+            media: print
+            onload: this.media='all'
+        locale: en_US
+        logo: /static/img/enfugue-logo.png
+        meta:
+          charset: utf-8
+          msapplication-config: /browserconfig.xml
+          msapplication-tileColor: '#ddb33d'
+          robots: noindex, nofollow
+          theme-color: '#ddb33d'
+          twitter:card: summary
+          twitter:image: /static/img/enfugue-icon.png
+          viewport: width=device-width, initial-scale=1, shrink-to-fit=no
+        opengraph:
+          image: /static/img/enfugue-share.png
+          image:height: 628
+          image:width: 1200
+          type: website
+        scripts:
+        - src: /static/js/vendor/gpu/gpu-browser.min.js
+        - async: null
+          src: /static/js/enfugue.mjs
+          type: module
+        site: Enfugue
+        social: []
+        windows:
+          icon:
+            href: /static/img/favicon/favicon-128x128.png
+            size: 128x128
+            type: image/png
+    name: Enfugue
+  domain: localhost
+  driver: cherrypy
+  host: 0.0.0.0
+  port: 3001
+  secure: true
+  template:
+    recurse: true
+session:
+  cookie: enfugue_session
+user:
+  cookie: enfugue_token
+  permissions:
+  - action: read
+    global: true
+    object_name: DiffusionModel
+    scope_type: explicit
+  - action:
+    - create
+    - update
+    - delete
+    group: admin
+    object_name: DiffusionModel
+    scope_type: explicit
+  - action: read
+    global: true
+    object_name: Download
+    scope_type: explicit
+  - action:
+    - create
+    - delete
+    group: admin
+    object_name: Download
+    scope_type: explicit
+  - action:
+    - read
+    - create
+    - delete
+    global: true
+    object_name: DiffusionInvocation
+    scope_type: explicit
+  - action:
+    - read
+    - update
+    group: admin
+    object_name: System
+    scope_type: explicit
+  - action:
+    - create
+    - read
+    - update
+    - delete
+    group: admin
+    object_name: User
+    scope_type: explicit
+  token:
+    days: 30
+  users:
+  - first_name: Default
+    groups:
+    - admin
+    last_name: User
+    password: enfugue
+    username: enfugue

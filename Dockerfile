@@ -1,30 +1,28 @@
-# Stage 1: Base
-FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04 as base
-
-ARG FOOOCUS_COMMIT=7b5bced6c2e98efa5c013624f6466ed0ba76970c
+FROM nvidia/cuda:11.7.1-cudnn8-runtime-ubuntu22.04 as enfugue
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=on \
-    SHELL=/bin/bash
+    SHELL=/bin/bash \
+    ENFUGUE_SERVER_PORT=3001 \
+    ENFUGUE_DOMAIN=localhost \
+    PORT=3001 \
+    PIP_CACHE_DIR=/Enfugue
 
 WORKDIR /
 
 # Install Ubuntu packages
-RUN apt update && \
-    apt -y upgrade && \
-    apt install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get -y upgrade && \
+    apt-get install -y --no-install-recommends \
         software-properties-common \
-        build-essential \
+        python3.10 \
         python3.10-venv \
         python3-pip \
         python3-tk \
-        python3-dev \
         nginx \
         bash \
-        dos2unix \
-        git \
+        git git-lfs \
         ncdu \
         net-tools \
         openssh-server \
@@ -33,12 +31,14 @@ RUN apt update && \
         libgl1 \
         libxrender1 \
         libxext6 \
+        libopencv-dev \
         ffmpeg \
         wget \
         curl \
         psmisc \
         rsync \
         vim \
+        nano \
         zip \
         unzip \
         htop \
@@ -47,71 +47,38 @@ RUN apt update && \
         libgoogle-perftools4 libtcmalloc-minimal4 \
         apt-transport-https ca-certificates && \
     update-ca-certificates && \
-    apt clean && \
+    apt-get clean && \
+    git lfs install && \
     rm -rf /var/lib/apt/lists/* && \
-    echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-
-# Set Python
-RUN ln -s /usr/bin/python3.10 /usr/bin/python
-
-# Stage 2: Install Fooocus and python modules
-FROM base as setup
-
-# Create and use the Python venv
-RUN python3 -m venv /venv
-
-# Clone the git repo of Fooocus and set version
-WORKDIR /
-RUN git clone https://github.com/lllyasviel/Fooocus.git && \
-    cd /Fooocus && \
-    git checkout ${FOOOCUS_COMMIT}
-
-# Install the dependencies for Fooocus
-WORKDIR /Fooocus
-ENV TORCH_INDEX_URL="https://download.pytorch.org/whl/cu118"
-RUN source /venv/bin/activate && \
-    pip3 install --no-cache-dir torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
-    pip3 install -r requirements_versions.txt --extra-index-url https://download.pytorch.org/whl/cu118 && \
-    pip3 install xformers==0.0.22 && \
-    sed '$d' launch.py > setup.py && \
-    python3 -m setup && \
-    deactivate
-
-# Install Jupyter
-RUN pip3 install -U --no-cache-dir jupyterlab \
+    echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+    ln -s /usr/bin/python3.10 /usr/bin/python && \
+    python3 -m venv /venv && \
+    source /venv/bin/activate && \
+    pip install --upgrade pip && \
+    pip install --upgrade setuptools && \
+    pip install --upgrade wheel && \
+    pip install nvidia-pyindex && \
+    pip install enfugue[tensorrt] && \
+    deactivate && \
+    cd / && \
+    pip3 install -U --no-cache-dir jupyterlab \
         jupyterlab_widgets \
         ipykernel \
         ipywidgets \
-        gdown
-
-# Install rclone
-RUN curl https://rclone.org/install.sh | bash
-
-# Install runpodctl
-RUN wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl-linux-amd -O runpodctl && \
+        gdown && \
+    wget https://github.com/runpod/runpodctl/releases/download/v1.10.0/runpodctl-linux-amd -O runpodctl && \
     chmod a+x runpodctl && \
-    mv runpodctl /usr/local/bin
-
-# Install croc
-RUN curl https://getcroc.schollz.com | bash
-
-# Install speedtest CLI
-RUN curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash && \
-    apt install speedtest
-
-# Remove existing SSH host keys
-RUN rm -f /etc/ssh/ssh_host_*
-
+    mv runpodctl /usr/local/bin && \
+    rm -f /etc/ssh/ssh_host_*
+    
 # NGINX Proxy
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 COPY nginx/502.html /usr/share/nginx/html/502.html
 
-# Set up the container startup script
-WORKDIR /
-
 # Copy the scripts
 COPY --chmod=755 scripts/* ./
+COPY --chmod=755 config.yml /Enfugue/config.yml
 
 # Start the container
 SHELL ["/bin/bash", "--login", "-c"]
-ENTRYPOINT [ "/start.sh" ]
+CMD [ "/start.sh" ]

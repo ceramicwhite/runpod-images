@@ -3,7 +3,7 @@
 ## Installs
 
 * Ubuntu 22.04 LTS
-* CUDA 11.8
+* CUDA 11.7.1
 * Python 3.10.12
 * [Fooocus](
   https://github.com/lllyasviel/Fooocus) 2.1.855

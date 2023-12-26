@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 export PYTHONUNBUFFERED=1
+export ENFUGUE_SERVER_PORT=3001
+export ENFUGUE_DOMAIN=localhost
 
 echo "Container is running"
 
@@ -7,9 +9,9 @@ echo "Container is running"
 echo "Syncing venv to workspace, please wait..."
 rsync -au /venv/ /workspace/venv/
 
-# Sync Fooocus to workspace to support Network volumes
-echo "Syncing Fooocus to workspace, please wait..."
-rsync -au /Fooocus/ /workspace/Fooocus/
+# Sync Enfugue to workspace to support Network volumes
+echo "Syncing Enfugue to workspace, please wait..."
+rsync -au /Enfugue/ /workspace/Enfugue/
 
 # Fix the venv to make it work from /workspace
 echo "Fixing venv..."
@@ -23,26 +25,20 @@ then
     echo "Auto launching is disabled so the application will not be started automatically"
     echo "You can launch it manually:"
     echo ""
-    echo "   cd /workspace/Fooocus"
+    echo "   cd /workspace/Enfugue"
     echo "   deactivate && source /workspace/venv/bin/activate"
-    echo "   python3 entry_with_update.py --listen --port 3001"
+    echo "   python -m enfugue run -c ./config.yml"
 else
-    echo "Starting Fooocus"
+    echo "Starting Enfugue"
     export HF_HOME="/workspace"
+    ulimit -n unlimited 2>/dev/null >/dev/null || true
     source /workspace/venv/bin/activate
-    cd /workspace/Fooocus
+    cd /workspace/Enfugue
+    echo "Starting Enfugue"
+    nohup python -m enfugue run -c ./config.yml > /workspace/logs/Enfugue.log 2>&1 &
 
-    if [[ ${PRESET} ]]
-    then
-        echo "Starting Fooocus using preset: ${PRESET}"
-        nohup python3 entry_with_update.py --listen --port 3001 --preset ${PRESET} > /workspace/logs/fooocus.log 2>&1 &
-    else
-        echo "Starting Fooocus using defaults"
-        nohup python3 entry_with_update.py --listen --port 3001 > /workspace/logs/fooocus.log 2>&1 &
-    fi
-
-    echo "Fooocus started"
-    echo "Log file: /workspace/logs/fooocus.log"
+    echo "Enfugue started"
+    echo "Log file: /workspace/logs/Enfugue.log"
     deactivate
 fi
 
