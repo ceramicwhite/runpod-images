@@ -5,9 +5,11 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
     SHELL=/bin/bash \
     ENFUGUE_SERVER_PORT=3001 \
-    ENFUGUE_DOMAIN=localhost \
-    PORT=3001 \
-    PIP_CACHE_DIR=/Enfugue
+    ENFUGUE_SERVER_DOMAIN=localhost \
+    ENFUGUE_SERVER_SECURE=false \
+    ENFUGUE_SERVER_NOAUTH=true \
+    ENFUGUE_ROOT=/Enfugue \
+    ENFUGUE_SERVER_ROOT=/Enfugue
 
 WORKDIR /
 
@@ -58,7 +60,12 @@ RUN apt-get update && \
     pip install --upgrade setuptools && \
     pip install --upgrade wheel && \
     pip install nvidia-pyindex && \
+    mkdir /Enfugue && \
+    cd /Enfugue && \
     pip install enfugue[tensorrt] && \
+    # curl https://raw.githubusercontent.com/painebenjamin/app.enfugue.ai/main/enfugue.sh -o enfugue.sh && \
+    # chmod u+x enfugue.sh && \
+    #./enfugue.sh --portable --update --mmpose && \   
     deactivate && \
     cd / && \
     pip3 install -U --no-cache-dir jupyterlab \
@@ -77,7 +84,7 @@ COPY nginx/502.html /usr/share/nginx/html/502.html
 
 # Copy the scripts
 COPY --chmod=755 scripts/* ./
-COPY --chmod=755 config.yml /Enfugue/config.yml
+#COPY --chmod=755 config.yml /config.yml
 
 # Start the container
 SHELL ["/bin/bash", "--login", "-c"]
